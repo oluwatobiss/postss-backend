@@ -1,19 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
+import type { PostUserOption } from "../types.d.ts";
 
 function createUser(req: Request, res: Response, next: NextFunction) {
-  const {
-    username,
-    email,
-    password,
-    admin,
-    adminCode,
-  }: {
-    username: string;
-    email: string;
-    password: string;
-    admin: boolean;
-    adminCode: string;
-  } = req.body;
+  const { username, email, password, admin, adminCode }: PostUserOption =
+    req.body;
 
   console.log({ username, email, password, admin, adminCode });
   console.log(res);
