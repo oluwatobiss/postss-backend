@@ -1,7 +1,12 @@
 import "dotenv/config";
 import cors from "cors";
-import express, { type Request, type Response } from "express";
 import userRouter from "./routes/user.ts";
+import express, {
+  type Request,
+  type Response,
+  type NextFunction,
+} from "express";
+import type { Error } from "./types.d.ts";
 
 const port = process.env.PORT || 3000;
 const app = express();
@@ -11,6 +16,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/users", userRouter);
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err);
+  err &&
+    res.status(400).json({
+      errors: [{ msg: `${err.cause.msg}`, path: `${err.cause.path}` }],
+    });
+});
 
 app.get("/", (req: Request, res: Response) =>
   res.send(`

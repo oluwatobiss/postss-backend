@@ -1,3 +1,4 @@
+type Error = { cause: { msg: string; path: string } };
 type PostUserOption = {
   username: string;
   email: string;
@@ -6,4 +7,4 @@ type PostUserOption = {
   adminCode: string;
 };
 
-export type { PostUserOption };
+export type { Error, PostUserOption };

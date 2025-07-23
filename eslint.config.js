@@ -13,5 +13,15 @@ export default defineConfig([
     files: ["**/*.{js,mjs,cjs,ts,mts,cts}"],
     languageOptions: { globals: globals.node },
   },
+  {
+    rules: {
+      "no-unused-expressions": [
+        {
+          allowShortCircuit: true,
+          allowTernary: true,
+        },
+      ],
+    },
+  },
   tseslint.configs.recommended,
 ]);
