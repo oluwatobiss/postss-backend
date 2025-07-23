@@ -1,6 +1,8 @@
+import "dotenv/config";
 import express, { type Request, type Response } from "express";
+
+const port = process.env.PORT || 3000;
 const app = express();
-const PORT = 3001;
 
 app.get("/", (req: Request, res: Response) =>
   res.send(`
@@ -13,6 +15,6 @@ app.get("/", (req: Request, res: Response) =>
   `)
 );
 
-app.listen(PORT, () => {
-  console.log(`Server listening for requests at port: ${PORT}!`);
+app.listen(port, () => {
+  console.log(`Server listening for requests at port: ${port}!`);
 });
