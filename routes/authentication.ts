@@ -6,7 +6,7 @@ import {
 } from "express";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { Strategy as LocalStrategy } from "passport-local";
-import type { Error } from "../types.d.ts";
+import type { DoneOptions, Error, Payload } from "../types.d.ts";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import passport from "passport";
@@ -45,19 +45,7 @@ passport.use(
 function authenticateUser(req: Request, res: Response, next: NextFunction) {
   passport.authenticate(
     "local",
-    async (
-      err: Error,
-      payload: {
-        password: string;
-        username: string;
-        email: string;
-        id: number;
-        firstName: string | null;
-        lastName: string | null;
-        status: string;
-      },
-      info: { msg: string; path: string }
-    ) => {
+    async (err: Error, payload: Payload, info: DoneOptions) => {
       try {
         if (err || !payload) {
           const error = Error("Authentication error", { cause: info });
