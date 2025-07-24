@@ -1,5 +1,6 @@
 import "dotenv/config";
 import cors from "cors";
+import authenticationRouter from "./routes/authentication.ts";
 import userRouter from "./routes/user.ts";
 import express, {
   type Request,
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/auths", authenticationRouter);
 app.use("/users", userRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
