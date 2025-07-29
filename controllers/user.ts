@@ -41,4 +41,37 @@ async function createUser(req: Request, res: Response, next: NextFunction) {
   });
 }
 
-export { createUser };
+async function updateUser(req: Request, res: Response, next: NextFunction) {
+  const { firstName, lastName, username, email, admin, adminCode } = req.body;
+  let status: Status = "BASIC";
+  if (admin) {
+    if (adminCode === process.env.ADMIN_CODE) {
+      status = "ADMIN";
+    } else {
+      return next(
+        Error("Incorrect admin code provided", {
+          cause: { msg: "Incorrect code", path: "adminCode" },
+        })
+      );
+    }
+  }
+  try {
+    const id = +req.params.id;
+    const userData = await prisma.user.update({
+      where: { id },
+      data: { firstName, lastName, username, email, status },
+    });
+    await prisma.$disconnect();
+    const lessUserData = {
+      ...userData,
+      password: "***",
+    };
+    return res.json(lessUserData);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+export { createUser, updateUser };

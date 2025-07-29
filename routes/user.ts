@@ -11,4 +11,11 @@ router.post(
   controller.createUser
 );
 
+router.put(
+  "/:id",
+  validate.updateUserForm,
+  validate.getResult,
+  controller.updateUser
+);
+
 export default router;
