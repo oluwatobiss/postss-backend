@@ -17,6 +17,12 @@ const updateUserForm = [
     .isLength({ min: 2, max: 64 })
     .withMessage(`Name ${lengthErr(2, 64)}.`)
     .optional({ values: "falsy" }),
+  body("bio")
+    .trim()
+    .notEmpty()
+    .isLength({ min: 7, max: 300 })
+    .withMessage(`Bio ${lengthErr(7, 300)}.`)
+    .escape(),
   body("email").trim().isEmail().withMessage("Enter a valid email."),
   body("adminCode")
     .trim()
