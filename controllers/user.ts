@@ -86,10 +86,6 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
 async function deleteUser(req: Request, res: Response) {
   try {
     const id = +req.params.id;
-
-    console.log("=== deleteUser ===");
-    console.log(id);
-
     const user = await prisma.user.delete({ where: { id } });
     await prisma.$disconnect();
     return res.json(user);
