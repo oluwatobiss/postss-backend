@@ -18,4 +18,6 @@ router.put(
   controller.updateUser
 );
 
+router.delete("/:id", controller.deleteUser);
+
 export default router;
