@@ -21,6 +21,7 @@ model User {
   username  String  @unique
   bio       String?
   email     String  @unique
+  website   String?
   password  String
   status    Status  @default(BASIC)
 }

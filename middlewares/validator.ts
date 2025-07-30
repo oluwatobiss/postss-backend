@@ -24,6 +24,7 @@ const updateUserForm = [
     .withMessage(`Bio ${lengthErr(7, 300)}.`)
     .escape(),
   body("email").trim().isEmail().withMessage("Enter a valid email."),
+  body("website").trim().isURL().withMessage("Enter a valid URL."),
   body("adminCode")
     .trim()
     .notEmpty()

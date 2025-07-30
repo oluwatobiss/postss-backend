@@ -42,8 +42,16 @@ async function createUser(req: Request, res: Response, next: NextFunction) {
 }
 
 async function updateUser(req: Request, res: Response, next: NextFunction) {
-  const { firstName, lastName, username, bio, email, admin, adminCode } =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    username,
+    bio,
+    email,
+    website,
+    admin,
+    adminCode,
+  } = req.body;
   let status: Status = "BASIC";
   if (admin) {
     if (adminCode === process.env.ADMIN_CODE) {
@@ -60,7 +68,7 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
     const id = +req.params.id;
     const userData = await prisma.user.update({
       where: { id },
-      data: { firstName, lastName, username, bio, email, status },
+      data: { firstName, lastName, username, bio, email, website, status },
     });
     await prisma.$disconnect();
     const lessUserData = {
