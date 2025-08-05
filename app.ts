@@ -7,6 +7,7 @@ import express, {
   type Response,
   type NextFunction,
 } from "express";
+import { Server } from "socket.io";
 import type { Error } from "./types.d.ts";
 
 const port = process.env.PORT || 3000;
@@ -37,6 +38,15 @@ app.get("/", (req: Request, res: Response) =>
   `)
 );
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server listening for requests at port: ${port}!`);
+});
+
+const io = new Server(server, { cors: { origin: process.env.POSTSS_APP_URI } });
+
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.on("disconnect", () => {
+    console.log("user disconnected");
+  });
 });
