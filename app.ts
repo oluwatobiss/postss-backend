@@ -2,6 +2,7 @@ import "dotenv/config";
 import cors from "cors";
 import authenticationRouter from "./routes/authentication.ts";
 import userRouter from "./routes/user.ts";
+import postRouter from "./routes/post.ts";
 import express, {
   type Request,
   type Response,
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auths", authenticationRouter);
 app.use("/users", userRouter);
+app.use("/posts", postRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err);
   err &&
