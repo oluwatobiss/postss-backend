@@ -1,24 +1,28 @@
 import type { Request, Response } from "express";
-// import { PrismaClient } from "@prisma/client";
-// const prisma = new PrismaClient();
+import { PrismaClient } from "../generated/prisma/client.js";
+
+const prisma = new PrismaClient();
 
 async function createPost(req: Request, res: Response) {
   try {
-    const { post, authorId } = req.body;
+    const { post: content, authorId } = req.body;
+
+    const io = req.app.get("io");
+    console.log("=== IO in createPost ===");
+    console.log(io);
 
     console.log("=== createPost ===");
-    console.log({ post, authorId });
+    console.log({ content, authorId });
 
-    // console.log({ content, authorId });
+    const post = await prisma.post.create({ data: { content, authorId } });
+    await prisma.$disconnect();
 
-    // const post = await prisma.post.create({
-    //   data: { authorId, title, body, published, publishedDate },
-    // });
-    // await prisma.$disconnect();
-    // return res.json(post);
+    console.log(post);
+
+    return res.json(post);
   } catch (e) {
     console.error(e);
-    // await prisma.$disconnect();
+    await prisma.$disconnect();
     process.exit(1);
   }
 }
