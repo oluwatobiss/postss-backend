@@ -46,9 +46,6 @@ const server = app.listen(port, () => {
 
 const io = new Server(server, { cors: { origin: process.env.POSTSS_APP_URI } });
 
-// Add io to app's setting to make it usable in the app's middlewares and controllers
-app.set("io", io);
-
 io.on("connection", (socket) => {
   console.log("a user connected");
 

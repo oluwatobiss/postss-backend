@@ -7,10 +7,6 @@ async function createPost(req: Request, res: Response) {
   try {
     const { post: content, authorId } = req.body;
 
-    const io = req.app.get("io");
-    console.log("=== IO in createPost ===");
-    console.log(io);
-
     console.log("=== createPost ===");
     console.log({ content, authorId });
 
