@@ -3,6 +3,7 @@ import cors from "cors";
 import authenticationRouter from "./routes/authentication.ts";
 import userRouter from "./routes/user.ts";
 import postRouter from "./routes/post.ts";
+import handleSocketConnection from "./sockets/connectionHandler.ts";
 import express, {
   type Request,
   type Response,
@@ -44,18 +45,8 @@ const server = app.listen(port, () => {
   console.log(`Server listening for requests at port: ${port}!`);
 });
 
-const io = new Server(server, { cors: { origin: process.env.POSTSS_APP_URI } });
-
-io.on("connection", (socket) => {
-  console.log("a user connected");
-
-  socket.on("submitPost", (msg: string) => {
-    console.log("post: " + msg);
-    // Send stored post to all the users (including the sender)
-    io.emit("submitPost", msg);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
+const io = new Server(server, {
+  cors: { origin: process.env.POSTSS_APP_URI, methods: ["GET", "POST"] },
 });
+
+handleSocketConnection(io);
