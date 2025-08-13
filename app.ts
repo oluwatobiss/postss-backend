@@ -1,18 +1,14 @@
-import "dotenv/config";
 import cors from "cors";
 import authenticationRouter from "./routes/authentication.ts";
 import userRouter from "./routes/user.ts";
 import postRouter from "./routes/post.ts";
-import handleSocketConnection from "./sockets/connectionHandler.ts";
 import express, {
   type Request,
   type Response,
   type NextFunction,
 } from "express";
-import { Server } from "socket.io";
 import type { Error } from "./types.d.ts";
 
-const port = process.env.PORT || 3000;
 const app = express();
 
 app.use(cors());
@@ -41,12 +37,4 @@ app.get("/", (req: Request, res: Response) =>
   `)
 );
 
-const server = app.listen(port, () => {
-  console.log(`Server listening for requests at port: ${port}!`);
-});
-
-const io = new Server(server, {
-  cors: { origin: process.env.POSTSS_APP_URI, methods: ["GET", "POST"] },
-});
-
-handleSocketConnection(io);
+export default app;
