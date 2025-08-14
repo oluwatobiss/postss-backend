@@ -3,6 +3,18 @@ import { PrismaClient } from "../generated/prisma/client.js";
 
 const prisma = new PrismaClient();
 
+async function getPosts(req: Request, res: Response) {
+  try {
+    const posts = await prisma.post.findMany();
+    await prisma.$disconnect();
+    return res.json(posts);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 async function createPost(req: Request, res: Response) {
   try {
     const { post: content, authorId } = req.body;
@@ -23,4 +35,4 @@ async function createPost(req: Request, res: Response) {
   }
 }
 
-export { createPost };
+export { getPosts, createPost };

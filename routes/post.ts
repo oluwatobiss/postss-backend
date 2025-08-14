@@ -3,6 +3,7 @@ import * as controller from "../controllers/post.ts";
 
 const router = Router();
 
+router.get("/", controller.getPosts);
 router.post("/", controller.createPost);
 
 export default router;
