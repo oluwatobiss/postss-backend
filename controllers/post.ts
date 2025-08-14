@@ -5,9 +5,16 @@ const prisma = new PrismaClient();
 
 async function getPosts(req: Request, res: Response) {
   try {
-    const posts = await prisma.post.findMany();
+    const posts = await prisma.post.findMany({
+      include: { author: true, comments: true },
+    });
     await prisma.$disconnect();
-    return res.json(posts);
+    const postsInfoPicked = posts.map((post) => ({
+      ...post,
+      author: post.author.username,
+      comments: post.comments.length,
+    }));
+    return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
