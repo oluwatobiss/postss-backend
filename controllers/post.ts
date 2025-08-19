@@ -42,4 +42,27 @@ async function createPost(req: Request, res: Response) {
   }
 }
 
-export { getPosts, createPost };
+async function updatePost(req: Request, res: Response) {
+  try {
+    const id = +req.params.id;
+    const { userId, likePost } = req.body;
+    const post = await prisma.post.update({
+      where: { id },
+      data: {
+        likes: likePost
+          ? { connect: { id: userId } }
+          : { disconnect: [{ id: userId }] },
+      },
+      include: { likes: true },
+    });
+    const totalLikes = { likes: post.likes.length };
+    await prisma.$disconnect();
+    return res.json(totalLikes);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+export { getPosts, createPost, updatePost };

@@ -24,7 +24,8 @@ model User {
   website   String?
   password  String
   status    Status    @default(BASIC)
-  posts     Post[]
+  posts     Post[]    @relation("Posts")
+  likes     Post[]    @relation("Likes")
   comments  Comment[]
 }
 
@@ -34,11 +35,11 @@ model Post {
   updatedAt DateTime  @updatedAt
   content   String?
   published Boolean   @default(false)
-  author    User      @relation(fields: [authorId], references: [id])
+  author    User      @relation("Posts", fields: [authorId], references: [id])
   authorId  Int
   comments  Comment[]
   views     Int       @default(0)
-  likes     Int       @default(0)
+  likes     User[]    @relation("Likes")
 }
 
 model Comment {
