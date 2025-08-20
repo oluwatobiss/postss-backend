@@ -4,16 +4,21 @@ import { PrismaClient } from "../generated/prisma/client.js";
 const prisma = new PrismaClient();
 
 async function getPosts(req: Request, res: Response) {
+  console.log("=== getPosts ===");
   try {
     const posts = await prisma.post.findMany({
-      include: { author: true, comments: true },
+      include: { author: true, comments: true, likes: true },
     });
     await prisma.$disconnect();
     const postsInfoPicked = posts.map((post) => ({
       ...post,
       author: post.author.username,
       comments: post.comments.length,
+      likes: post.likes.map((like) => like.id),
     }));
+
+    console.log(postsInfoPicked);
+
     return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
@@ -55,6 +60,10 @@ async function updatePost(req: Request, res: Response) {
       },
       include: { likes: true },
     });
+
+    console.log("=== updatePost ===");
+    console.log(post);
+
     const totalLikes = { likes: post.likes.length };
     await prisma.$disconnect();
     return res.json(totalLikes);
