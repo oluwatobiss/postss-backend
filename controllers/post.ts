@@ -49,6 +49,7 @@ async function createPost(req: Request, res: Response) {
 
 async function updatePost(req: Request, res: Response) {
   try {
+    const io = req.app.get("io");
     const id = +req.params.id;
     const { userId, likePost } = req.body;
     const post = await prisma.post.update({
@@ -60,12 +61,17 @@ async function updatePost(req: Request, res: Response) {
       },
       include: { likes: true },
     });
+    await prisma.$disconnect();
 
     console.log("=== updatePost ===");
     console.log(post);
 
-    const totalLikes = { likes: post.likes.length };
-    await prisma.$disconnect();
+    const totalLikes = { postId: post.id, likes: post.likes.length };
+    console.log(totalLikes);
+
+    // Send total post likes to all the users (including the sender)
+    io.emit("postLike", totalLikes);
+
     return res.json(totalLikes);
   } catch (e) {
     console.error(e);

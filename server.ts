@@ -14,3 +14,6 @@ const io = new Server(server, {
 });
 
 handleSocketConnection(io);
+
+// Add io to app's setting to make it usable in the app's middlewares and controllers
+app.set("io", io);
