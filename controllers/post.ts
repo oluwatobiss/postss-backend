@@ -8,6 +8,7 @@ async function getPosts(req: Request, res: Response) {
   try {
     const posts = await prisma.post.findMany({
       include: { author: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
     });
     await prisma.$disconnect();
     const postsInfoPicked = posts.map((post) => ({
@@ -36,6 +37,7 @@ async function getAuthorPosts(req: Request, res: Response) {
     const posts = await prisma.post.findMany({
       where: { authorId },
       include: { author: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
     });
     await prisma.$disconnect();
     const postsInfoPicked = posts.map((post) => ({
