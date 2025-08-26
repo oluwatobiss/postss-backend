@@ -27,6 +27,34 @@ async function getPosts(req: Request, res: Response) {
   }
 }
 
+async function getAuthorPosts(req: Request, res: Response) {
+  console.log("=== getAuthorPosts ===");
+  try {
+    const authorId = +req.params.authorId;
+    console.log({ authorId });
+
+    const posts = await prisma.post.findMany({
+      where: { authorId },
+      include: { author: true, comments: true, likes: true },
+    });
+    await prisma.$disconnect();
+    const postsInfoPicked = posts.map((post) => ({
+      ...post,
+      author: post.author.username,
+      comments: post.comments.length,
+      likes: post.likes.map((like) => like.id),
+    }));
+
+    console.log(postsInfoPicked);
+
+    return res.json(postsInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 async function createPost(req: Request, res: Response) {
   try {
     const { post: content, authorId } = req.body;
@@ -80,4 +108,4 @@ async function updatePost(req: Request, res: Response) {
   }
 }
 
-export { getPosts, createPost, updatePost };
+export { getPosts, getAuthorPosts, createPost, updatePost };
