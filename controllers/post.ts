@@ -4,7 +4,7 @@ import { PrismaClient } from "../generated/prisma/client.js";
 const prisma = new PrismaClient();
 
 async function getPosts(req: Request, res: Response) {
-  console.log("=== getPosts ===");
+  // console.log("=== getPosts ===");
   try {
     const posts = await prisma.post.findMany({
       include: { author: true, comments: true, likes: true },
@@ -18,7 +18,7 @@ async function getPosts(req: Request, res: Response) {
       likes: post.likes.map((like) => like.id),
     }));
 
-    console.log(postsInfoPicked);
+    // console.log(postsInfoPicked);
 
     return res.json(postsInfoPicked);
   } catch (e) {
@@ -68,7 +68,7 @@ async function createPost(req: Request, res: Response) {
       orderBy: { createdAt: "desc" },
     });
     await prisma.$disconnect();
-    
+
     const postsInfoPicked = posts.map((post) => ({
       ...post,
       author: post.author.username,
@@ -119,4 +119,33 @@ async function updatePost(req: Request, res: Response) {
   }
 }
 
-export { getPosts, getAuthorPosts, createPost, updatePost };
+async function deletePost(req: Request, res: Response) {
+  try {
+    const id = +req.params.id;
+    const post = await prisma.post.delete({ where: { id } });
+    const posts = await prisma.post.findMany({
+      include: { author: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$disconnect();
+
+    const postsInfoPicked = posts.map((post) => ({
+      ...post,
+      author: post.author.username,
+      comments: post.comments.length,
+      likes: post.likes.map((like) => like.id),
+    }));
+
+    console.log("=== deletePost ===");
+    console.log(postsInfoPicked);
+    console.log(post);
+
+    return res.json(postsInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+export { getPosts, getAuthorPosts, createPost, updatePost, deletePost };
