@@ -59,17 +59,26 @@ async function getAuthorPosts(req: Request, res: Response) {
 
 async function createPost(req: Request, res: Response) {
   try {
+    const io = req.app.get("io");
     const { post: content, authorId } = req.body;
 
-    console.log("=== createPost ===");
-    console.log({ content, authorId });
-
-    const post = await prisma.post.create({ data: { content, authorId } });
+    await prisma.post.create({ data: { content, authorId } });
+    const posts = await prisma.post.findMany({
+      include: { author: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
     await prisma.$disconnect();
+    
+    const postsInfoPicked = posts.map((post) => ({
+      ...post,
+      author: post.author.username,
+      comments: post.comments.length,
+      likes: post.likes.map((like) => like.id),
+    }));
 
-    console.log(post);
-
-    return res.json(post);
+    // Send the new post created to all the users (including the sender)
+    io.emit("newPost", postsInfoPicked);
+    return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
