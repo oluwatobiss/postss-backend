@@ -76,7 +76,7 @@ async function createPost(req: Request, res: Response) {
       likes: post.likes.map((like) => like.id),
     }));
 
-    // Send the new post created to all the users (including the sender)
+    // Send the new post created to all connected users (including the sender)
     io.emit("newPost", postsInfoPicked);
     return res.json(postsInfoPicked);
   } catch (e) {
@@ -108,7 +108,7 @@ async function updatePost(req: Request, res: Response) {
     const totalLikes = { postId: post.id, likes: post.likes.length };
     console.log(totalLikes);
 
-    // Send total post likes to all the users (including the sender)
+    // Send total post likes to all connected users (including the sender)
     io.emit("postLike", totalLikes);
 
     return res.json(totalLikes);
@@ -121,6 +121,7 @@ async function updatePost(req: Request, res: Response) {
 
 async function deletePost(req: Request, res: Response) {
   try {
+    const io = req.app.get("io");
     const id = +req.params.id;
     const post = await prisma.post.delete({ where: { id } });
     const posts = await prisma.post.findMany({
@@ -140,6 +141,8 @@ async function deletePost(req: Request, res: Response) {
     console.log(postsInfoPicked);
     console.log(post);
 
+    // Send the updated post list to connected users (including the sender)
+    io.emit("deletePost", postsInfoPicked);
     return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
