@@ -186,6 +186,39 @@ async function updatePost(req: Request, res: Response) {
   }
 }
 
+async function updateComment(req: Request, res: Response) {
+  try {
+    const io = req.app.get("io");
+    const id = +req.params.id;
+    const { userId, likePost } = req.body;
+    const comment = await prisma.comment.update({
+      where: { id },
+      data: {
+        likes: likePost
+          ? { connect: { id: userId } }
+          : { disconnect: [{ id: userId }] },
+      },
+      include: { likes: true },
+    });
+    await prisma.$disconnect();
+
+    console.log("=== updateComment ===");
+    console.log(comment);
+
+    const totalLikes = { commentId: comment.id, likes: comment.likes.length };
+    console.log(totalLikes);
+
+    // Send total comment likes to all connected users (including the sender)
+    io.emit("commentLike", totalLikes);
+
+    return res.json(totalLikes);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 async function deletePost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
@@ -226,5 +259,6 @@ export {
   createPost,
   createComment,
   updatePost,
+  updateComment,
   deletePost,
 };
