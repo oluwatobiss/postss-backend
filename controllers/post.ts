@@ -126,7 +126,6 @@ async function createComment(req: Request, res: Response) {
 
     await prisma.comment.create({ data: { content, authorId, postId } });
     const comments = await prisma.comment.findMany({
-      where: { postId },
       include: { author: true, likes: true },
       orderBy: { createdAt: "desc" },
     });
