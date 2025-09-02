@@ -57,6 +57,35 @@ async function getAuthorPosts(req: Request, res: Response) {
   }
 }
 
+async function getPostComments(req: Request, res: Response) {
+  console.log("=== getPostComments ===");
+  try {
+    const postId = +req.params.postId;
+    console.log({ postId });
+
+    const comments = await prisma.comment.findMany({
+      where: { postId },
+      include: { author: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$disconnect();
+
+    const commentsInfoPicked = comments.map((comment) => ({
+      ...comment,
+      author: comment.author.username,
+      likes: comment.likes.map((like) => like.id),
+    }));
+
+    console.log(commentsInfoPicked);
+
+    return res.json(commentsInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
@@ -97,6 +126,7 @@ async function createComment(req: Request, res: Response) {
 
     await prisma.comment.create({ data: { content, authorId, postId } });
     const comments = await prisma.comment.findMany({
+      where: { postId },
       include: { author: true, likes: true },
       orderBy: { createdAt: "desc" },
     });
@@ -192,6 +222,7 @@ async function deletePost(req: Request, res: Response) {
 export {
   getPosts,
   getAuthorPosts,
+  getPostComments,
   createPost,
   createComment,
   updatePost,

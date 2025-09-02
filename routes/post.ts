@@ -5,6 +5,7 @@ const router = Router();
 
 router.get("/", controller.getPosts);
 router.get("/authors/:authorId", controller.getAuthorPosts);
+router.get("/:postId/comments", controller.getPostComments);
 router.post("/", controller.createPost);
 router.post("/:postId/comments", controller.createComment);
 router.put("/:id", controller.updatePost);
