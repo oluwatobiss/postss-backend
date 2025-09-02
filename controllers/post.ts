@@ -60,7 +60,7 @@ async function getAuthorPosts(req: Request, res: Response) {
 async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
-    const { post: content, authorId } = req.body;
+    const { content, authorId } = req.body;
 
     await prisma.post.create({ data: { content, authorId } });
     const posts = await prisma.post.findMany({
@@ -79,6 +79,43 @@ async function createPost(req: Request, res: Response) {
     // Send the new post created to all connected users (including the sender)
     io.emit("newPost", postsInfoPicked);
     return res.json(postsInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+async function createComment(req: Request, res: Response) {
+  try {
+    const io = req.app.get("io");
+    const postId = +req.params.postId;
+    const { content, authorId } = req.body;
+
+    console.log("=== createComment ===");
+    console.log({ postId });
+
+    await prisma.comment.create({ data: { content, authorId, postId } });
+    const comments = await prisma.comment.findMany({
+      include: { author: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$disconnect();
+
+    const commentsInfoPicked = comments.map((comment) => ({
+      ...comment,
+      author: comment.author.username,
+      likes: comment.likes.map((like) => like.id),
+    }));
+
+    console.log("=== Comments ===");
+    console.log(comments);
+    console.log("=== Comments Info Picked===");
+    console.log(commentsInfoPicked);
+
+    // Send the new comment created to all connected users (including the sender)
+    io.emit("newComment", commentsInfoPicked);
+    return res.json(commentsInfoPicked);
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();
@@ -137,8 +174,9 @@ async function deletePost(req: Request, res: Response) {
       likes: post.likes.map((like) => like.id),
     }));
 
-    console.log("=== deletePost ===");
+    console.log("=== deletePost Picked ===");
     console.log(postsInfoPicked);
+    console.log("=== Post deleted ===");
     console.log(post);
 
     // Send the updated post list to connected users (including the sender)
@@ -151,4 +189,11 @@ async function deletePost(req: Request, res: Response) {
   }
 }
 
-export { getPosts, getAuthorPosts, createPost, updatePost, deletePost };
+export {
+  getPosts,
+  getAuthorPosts,
+  createPost,
+  createComment,
+  updatePost,
+  deletePost,
+};
