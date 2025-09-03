@@ -251,6 +251,38 @@ async function deletePost(req: Request, res: Response) {
   }
 }
 
+async function deleteComment(req: Request, res: Response) {
+  try {
+    const io = req.app.get("io");
+    const id = +req.params.id;
+    const comment = await prisma.comment.delete({ where: { id } });
+    const comments = await prisma.comment.findMany({
+      include: { author: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$disconnect();
+
+    const commentsInfoPicked = comments.map((comment) => ({
+      ...comment,
+      author: comment.author.username,
+      likes: comment.likes.map((like) => like.id),
+    }));
+
+    console.log("=== deleteComment Picked ===");
+    console.log(commentsInfoPicked);
+    console.log("=== Comment deleted ===");
+    console.log(comment);
+
+    // Send the updated comment list to connected users (including the sender)
+    io.emit("deleteComment", commentsInfoPicked);
+    return res.json(commentsInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 export {
   getPosts,
   getAuthorPosts,
@@ -260,4 +292,5 @@ export {
   updatePost,
   updateComment,
   deletePost,
+  deleteComment,
 };

@@ -11,5 +11,6 @@ router.post("/:postId/comments", controller.createComment);
 router.put("/:id", controller.updatePost);
 router.put("/:postId/comments/:id", controller.updateComment);
 router.delete("/:id", controller.deletePost);
+router.delete("/:postId/comments/:id", controller.deleteComment);
 
 export default router;
