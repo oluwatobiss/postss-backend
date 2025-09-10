@@ -28,6 +28,8 @@ model User {
   postLikes    Post[]    @relation("PostLikes")
   comments     Comment[]
   commentLikes Comment[] @relation("CommentLikes")
+  followers    Int[]
+  following    Int[]
 }
 
 model Post {

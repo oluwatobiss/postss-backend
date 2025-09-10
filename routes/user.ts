@@ -4,6 +4,8 @@ import * as validate from "../middlewares/validator.ts";
 
 const router = Router();
 
+router.get("/", controller.getUsers);
+
 router.post(
   "/",
   validate.signUpForm,

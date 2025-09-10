@@ -5,6 +5,25 @@ import type { PostUserOption } from "../types.d.ts";
 
 const prisma = new PrismaClient();
 
+async function getUsers(req: Request, res: Response) {
+  try {
+    const users = await prisma.user.findMany();
+    await prisma.$disconnect();
+    const usersInfoPicked = users.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      bio: user.bio,
+    }));
+    return res.json(usersInfoPicked);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 async function createUser(req: Request, res: Response, next: NextFunction) {
   const { username, email, password, admin, adminCode }: PostUserOption =
     req.body;
@@ -96,4 +115,4 @@ async function deleteUser(req: Request, res: Response) {
   }
 }
 
-export { createUser, updateUser, deleteUser };
+export { getUsers, createUser, updateUser, deleteUser };
