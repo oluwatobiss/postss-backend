@@ -20,7 +20,7 @@ router.put(
   controller.updateUser
 );
 
-router.put("/:idToFollow/:id", controller.updateFollowData);
+router.put("/:followId/:id", controller.updateFollowData);
 
 router.delete("/:id", controller.deleteUser);
 

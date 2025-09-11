@@ -101,19 +101,58 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
 
 async function updateFollowData(req: Request, res: Response) {
   try {
-    const idToFollow = +req.params.idToFollow;
     const id = +req.params.id;
-    const result = await prisma.$transaction([
-      prisma.user.update({
-        where: { id: idToFollow },
-        data: { followers: { push: id } },
-      }),
-      prisma.user.update({
-        where: { id },
-        data: { following: { push: idToFollow } },
-      }),
-    ]);
+    const followId = +req.params.followId;
+    const followUser = req.query.follow === "true";
+    // Follow or unfollow user (followId) by either pushing or filtering away ids from user models
+    const result = followUser
+      ? await prisma.$transaction([
+          prisma.user.update({
+            where: { id: followId },
+            data: { followers: { push: id } },
+          }),
+          prisma.user.update({
+            where: { id },
+            data: { following: { push: followId } },
+          }),
+        ])
+      : await prisma.$transaction(async (tx) => {
+          const userToUnfollow = await tx.user.findUnique({
+            where: { id: followId },
+          });
+          const userData = await tx.user.findUnique({
+            where: { id },
+          });
+          const updatedUserToUnfollow = userToUnfollow?.followers.filter(
+            (f) => f !== id
+          ); // Remove id
+
+          console.log("=== updatedUserToUnfollow ===");
+          console.log(updatedUserToUnfollow);
+
+          const updatedUserData = userData?.following.filter(
+            (f) => f !== followId
+          ); // Remove followId
+
+          console.log("=== updatedUserData ===");
+          console.log(updatedUserData);
+
+          const step1 = await tx.user.update({
+            where: { id: followId },
+            data: { followers: updatedUserToUnfollow },
+          });
+          const step2 = await tx.user.update({
+            where: { id },
+            data: { following: updatedUserData },
+          });
+          return [step1, step2];
+        });
     await prisma.$disconnect();
+
+    console.log("=== updateFollowData ===");
+    console.log({ followUser });
+    console.log(result);
+
     const lessUserData = { ...result[1], password: "***" };
     return res.json(lessUserData);
   } catch (e) {
