@@ -20,6 +20,8 @@ router.put(
   controller.updateUser
 );
 
+router.put("/:idToFollow/:id", controller.updateFollowData);
+
 router.delete("/:id", controller.deleteUser);
 
 export default router;

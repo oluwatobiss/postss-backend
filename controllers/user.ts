@@ -90,10 +90,31 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
       data: { firstName, lastName, username, bio, email, website, status },
     });
     await prisma.$disconnect();
-    const lessUserData = {
-      ...userData,
-      password: "***",
-    };
+    const lessUserData = { ...userData, password: "***" };
+    return res.json(lessUserData);
+  } catch (e) {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
+async function updateFollowData(req: Request, res: Response) {
+  try {
+    const idToFollow = +req.params.idToFollow;
+    const id = +req.params.id;
+    const result = await prisma.$transaction([
+      prisma.user.update({
+        where: { id: idToFollow },
+        data: { followers: { push: id } },
+      }),
+      prisma.user.update({
+        where: { id },
+        data: { following: { push: idToFollow } },
+      }),
+    ]);
+    await prisma.$disconnect();
+    const lessUserData = { ...result[1], password: "***" };
     return res.json(lessUserData);
   } catch (e) {
     console.error(e);
@@ -115,4 +136,4 @@ async function deleteUser(req: Request, res: Response) {
   }
 }
 
-export { getUsers, createUser, updateUser, deleteUser };
+export { getUsers, createUser, updateUser, updateFollowData, deleteUser };
