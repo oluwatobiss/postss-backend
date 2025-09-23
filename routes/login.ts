@@ -6,7 +6,7 @@ import {
 } from "express";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { Strategy as LocalStrategy } from "passport-local";
-import type { DoneOptions, Error, Payload } from "../types.d.ts";
+import type { DoneOptions, Error, Payload } from "../types.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import passport from "passport";

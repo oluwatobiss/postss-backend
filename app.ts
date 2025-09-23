@@ -1,5 +1,5 @@
 import cors from "cors";
-import authenticationRouter from "./routes/authentication.ts";
+import loginRouter from "./routes/login.ts";
 import userRouter from "./routes/user.ts";
 import postRouter from "./routes/post.ts";
 import express, {
@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/auths", authenticationRouter);
+app.use("/login", loginRouter);
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
