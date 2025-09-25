@@ -1,12 +1,33 @@
+import passport from "passport";
 import type { Request, Response, NextFunction } from "express";
 import type { DoneOptions, Error, User } from "../types.js";
-import { generateToken } from "../utils/jwt.ts";
-import passport from "passport";
-import "../passport/github.ts";
+import { generateToken, verifyToken } from "../utils/jwt.ts";
 import "../passport/local.ts";
 
+function getUserInfo(req: Request, res: Response) {
+  const token = req.cookies.jwt; // get the token res.cookie stored as jwt
+  if (!token)
+    return res.status(401).json({ error: "No verification token found" });
+  const payload = verifyToken(token);
+  if (!payload)
+    return res.status(401).json({ error: "Invalid verification token" });
+  res.json({ token, payload });
+}
+
 function loginWithGitHub(req: Request, res: Response) {
-  res.redirect(`${process.env.POSTSS_APP_URI}/profile`);
+  const token = generateToken(req.user as User);
+  // Set JWT in httpOnly cookie while sending a response to front-end.
+  // This is safer than exposing the JWT in the URL as a query parameter (/profile?token=...)
+  // It protects against XSS attack.
+  // Exposing JWT in a URL will make it readable by frontend JS and leaked in browser history.
+  res.cookie("jwt", token, {
+    httpOnly: true, // make the cookie inaccessible to front-end JavaScript
+    secure: process.env.NODE_ENV === "production", // ensure cookie is sent via only https in production
+    sameSite: "lax",
+    // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 5 * 60 * 1000, // 5 mins
+  });
+  res.redirect(`${process.env.POSTSS_APP_URI}/github`);
 }
 
 // Use passport.authenticate()'s optional callback syntax to enable sending a meaningful failure message
@@ -36,4 +57,4 @@ function loginWithLocal(req: Request, res: Response, next: NextFunction) {
   )(req, res, next);
 }
 
-export { loginWithGitHub, loginWithLocal };
+export { getUserInfo, loginWithGitHub, loginWithLocal };

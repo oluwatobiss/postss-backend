@@ -1,11 +1,13 @@
-import { Router } from "express";
 import passport from "passport";
+import { Router } from "express";
 import * as validate from "../middlewares/validator.ts";
 import * as controller from "../controllers/login.ts";
+import "../passport/github.ts";
 
 const router = Router();
 
 router.get("/", passport.authenticate("github", { scope: ["profile"] }));
+router.get("/user", controller.getUserInfo);
 router.get(
   "/github",
   passport.authenticate("github", {
@@ -14,7 +16,6 @@ router.get(
   }),
   controller.loginWithGitHub
 );
-
 router.post(
   "/",
   validate.loginForm,

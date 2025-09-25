@@ -19,10 +19,7 @@ passport.use(
           msg: "Incorrect password",
           path: "password",
         });
-      const lessUserData = {
-        ...userData,
-        password: "***",
-      };
+      const lessUserData = { ...userData, password: "***" };
       return done(null, lessUserData);
     } catch (e) {
       console.error(e);
