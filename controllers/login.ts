@@ -2,7 +2,18 @@ import type { Request, Response, NextFunction } from "express";
 import type { DoneOptions, Error, Payload } from "../types.js";
 import jwt from "jsonwebtoken";
 import passport from "passport";
+import "../passport/github.ts";
 import "../passport/local.ts";
+
+const redirectGitHub = [
+  passport.authenticate("github", {
+    session: false,
+    failureRedirect: `${process.env.POSTSS_APP_URI}/login`,
+  }),
+  (req: Request, res: Response) => {
+    res.redirect(`${process.env.POSTSS_APP_URI}/profile`);
+  },
+];
 
 function loginWithLocal(req: Request, res: Response, next: NextFunction) {
   passport.authenticate(
@@ -26,4 +37,4 @@ function loginWithLocal(req: Request, res: Response, next: NextFunction) {
   )(req, res, next);
 }
 
-export { loginWithLocal };
+export { redirectGitHub, loginWithLocal };

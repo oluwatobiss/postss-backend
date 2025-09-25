@@ -1,9 +1,12 @@
 import { Router } from "express";
+import passport from "passport";
 import * as validate from "../middlewares/validator.ts";
 import * as controller from "../controllers/login.ts";
 
 const router = Router();
 
+router.get("/", passport.authenticate("github", { scope: ["profile"] }));
+router.get("/github", controller.redirectGitHub);
 router.post(
   "/",
   validate.loginForm,
