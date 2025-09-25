@@ -1,4 +1,5 @@
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import loginRouter from "./routes/login.ts";
 import userRouter from "./routes/user.ts";
 import postRouter from "./routes/post.ts";
@@ -11,9 +12,11 @@ import type { Error } from "./types.d.ts";
 
 const app = express();
 
-app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// credential: true tells cors to allow cookies from front-end
+app.use(cors({ origin: process.env.POSTSS_APP_URI, credentials: true }));
 
 app.use("/login", loginRouter);
 app.use("/users", userRouter);

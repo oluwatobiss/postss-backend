@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import type { DoneOptions, Error, Payload } from "../types.js";
-import jwt from "jsonwebtoken";
+import type { DoneOptions, Error, User } from "../types.js";
+import { generateToken } from "../utils/jwt.ts";
 import passport from "passport";
 import "../passport/github.ts";
 import "../passport/local.ts";
@@ -17,7 +17,7 @@ function loginWithGitHub(req: Request, res: Response) {
 function loginWithLocal(req: Request, res: Response, next: NextFunction) {
   passport.authenticate(
     "local",
-    async (err: Error, payload: Payload, info: DoneOptions) => {
+    async (err: Error, payload: User, info: DoneOptions) => {
       try {
         if (err || !payload) {
           const error = Error("Authentication error", { cause: info });
@@ -26,7 +26,7 @@ function loginWithLocal(req: Request, res: Response, next: NextFunction) {
         const user = { id: payload.id };
         req.login(user, { session: false }, async (error) => {
           if (error) return next(error);
-          const token = jwt.sign(payload, process.env.JWT_SECRET!);
+          const token = generateToken(payload);
           return res.json({ token, payload });
         });
       } catch (error) {

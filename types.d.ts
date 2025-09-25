@@ -8,19 +8,22 @@ declare module "passport-local" {
 type DoneOptions = { msg: string; path: string };
 type Error = { cause: DoneOptions };
 type User = {
-  email: string;
-  password: string;
-  username: string;
-};
-type Payload = User & {
   id: number;
   firstName: string | null;
   lastName: string | null;
+  username: string;
+  bio: string;
+  email: string;
+  website: string;
+  password: string;
   status: string;
+  followers: number[];
+  following: number[];
+  iat: number;
 };
 type PostUserOption = User & {
   admin: boolean;
   adminCode: string;
 };
 
-export type { DoneOptions, Error, Payload, PostUserOption };
+export type { DoneOptions, Error, User, PostUserOption };
