@@ -1,6 +1,7 @@
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import loginRouter from "./routes/login.ts";
+import logoutRouter from "./routes/logout.ts";
 import userRouter from "./routes/user.ts";
 import postRouter from "./routes/post.ts";
 import express, {
@@ -19,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: process.env.POSTSS_APP_URI, credentials: true }));
 
 app.use("/login", loginRouter);
+app.use("/logout", logoutRouter);
 app.use("/users", userRouter);
 app.use("/posts", postRouter);
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
