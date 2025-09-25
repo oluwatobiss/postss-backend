@@ -24,7 +24,7 @@ passport.use(
         const { bio, blog, email } = profile._json;
         const name = profile.displayName.split(" ");
         const userData = await prisma.user.upsert({
-          where: { email: process.env.DEMO_EMAIL },
+          where: { email },
           update: {
             firstName: name[0] ?? "",
             lastName: name[1] ?? "",
