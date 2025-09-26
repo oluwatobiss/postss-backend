@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
+import { PrismaClient } from "../generated/prisma/client.js";
 import { body, validationResult } from "express-validator";
+
+const prisma = new PrismaClient();
 
 const alphaErr = "can contain only letters";
 const emptyErr = "must not be blank";
@@ -24,7 +27,17 @@ const updateUserForm = [
     .withMessage(`Bio ${lengthErr(7, 300)}.`)
     .escape()
     .optional({ values: "falsy" }),
-  body("email").trim().isEmail().withMessage("Enter a valid email."),
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Enter a valid email.")
+    .custom(async (email) => {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      await prisma.$disconnect();
+      if (existingUser) {
+        throw new Error("E-mail already in use");
+      }
+    }),
   body("website")
     .trim()
     .isURL()
