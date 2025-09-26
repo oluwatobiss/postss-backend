@@ -67,6 +67,7 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
     lastName,
     username,
     bio,
+    avatar,
     email,
     website,
     admin,
@@ -88,7 +89,16 @@ async function updateUser(req: Request, res: Response, next: NextFunction) {
     const id = +req.params.id;
     const userData = await prisma.user.update({
       where: { id },
-      data: { firstName, lastName, username, bio, email, website, status },
+      data: {
+        firstName,
+        lastName,
+        username,
+        bio,
+        avatar,
+        email,
+        website,
+        status,
+      },
     });
     await prisma.$disconnect();
     const lessUserData = { ...userData, password: "***" };
@@ -127,17 +137,9 @@ async function updateFollowData(req: Request, res: Response) {
           const updatedUserToUnfollow = userToUnfollow?.followers.filter(
             (f) => f !== id
           ); // Remove id
-
-          console.log("=== updatedUserToUnfollow ===");
-          console.log(updatedUserToUnfollow);
-
           const updatedUserData = userData?.following.filter(
             (f) => f !== followId
           ); // Remove followId
-
-          console.log("=== updatedUserData ===");
-          console.log(updatedUserData);
-
           const step1 = await tx.user.update({
             where: { id: followId },
             data: { followers: updatedUserToUnfollow },
@@ -149,11 +151,6 @@ async function updateFollowData(req: Request, res: Response) {
           return [step1, step2];
         });
     await prisma.$disconnect();
-
-    console.log("=== updateFollowData ===");
-    console.log({ followUser });
-    console.log(result);
-
     const lessUserData = { ...result[1], password: "***" };
     return res.json(lessUserData);
   } catch (e) {

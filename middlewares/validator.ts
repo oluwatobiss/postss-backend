@@ -23,21 +23,23 @@ const updateUserForm = [
   body("bio")
     .trim()
     .notEmpty()
+    .withMessage(`Bio ${emptyErr}.`)
     .isLength({ min: 7, max: 300 })
     .withMessage(`Bio ${lengthErr(7, 300)}.`)
-    .escape()
-    .optional({ values: "falsy" }),
-  body("email")
+    .escape(),
+  body("avatar")
     .trim()
-    .isEmail()
-    .withMessage("Enter a valid email.")
-    .custom(async (email) => {
-      const existingUser = await prisma.user.findUnique({ where: { email } });
-      await prisma.$disconnect();
-      if (existingUser) {
-        throw new Error("E-mail already in use");
-      }
-    }),
+    .isURL()
+    .withMessage("Enter a valid URL.")
+    .custom((url) => {
+      const nonGitHubUrl = /^https:\/\/avatars.githubusercontent.com\/u\//.test(
+        url
+      );
+      if (!nonGitHubUrl) throw new Error("Enter a valid GitHub avatar URL.");
+      return nonGitHubUrl;
+    })
+    .optional({ values: "falsy" }),
+  body("email").trim().isEmail().withMessage("Enter a valid email."),
   body("website")
     .trim()
     .isURL()
@@ -52,7 +54,6 @@ const updateUserForm = [
 ];
 
 const signUpForm = [
-  ...updateUserForm,
   body("username")
     .trim()
     .notEmpty()
@@ -60,6 +61,17 @@ const signUpForm = [
     .escape()
     .isLength({ min: 2, max: 8 })
     .withMessage(`Username ${lengthErr(2, 8)}.`),
+  body("email")
+    .trim()
+    .isEmail()
+    .withMessage("Enter a valid email.")
+    .custom(async (email) => {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      await prisma.$disconnect();
+      if (existingUser) {
+        throw new Error("E-mail already in use.");
+      }
+    }),
   body("password")
     .trim()
     .notEmpty()

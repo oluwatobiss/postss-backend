@@ -32,7 +32,7 @@ passport.use(
             bio: bio ?? "",
             email: email ?? "",
             website: blog ?? "",
-            avatar: avatar_url ?? "",
+            avatar: avatar_url.replace(/\?.*/g, "") ?? "",
           },
           create: {
             firstName: name[0] ?? "",
@@ -42,7 +42,7 @@ passport.use(
             email: email ?? "",
             website: blog ?? "",
             password: "",
-            avatar: avatar_url ?? "",
+            avatar: avatar_url.replace(/\?.*/g, "") ?? "",
           },
         });
         await prisma.$disconnect();
