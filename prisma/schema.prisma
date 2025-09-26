@@ -23,6 +23,7 @@ model User {
   email        String    @unique
   website      String?
   password     String
+  avatar       String?
   status       Status    @default(BASIC)
   posts        Post[]    @relation("Posts")
   postLikes    Post[]    @relation("PostLikes")

@@ -21,7 +21,7 @@ passport.use(
     ) => {
       try {
         const { username } = profile;
-        const { bio, blog, email } = profile._json;
+        const { avatar_url, bio, blog, email } = profile._json;
         const name = profile.displayName.split(" ");
         const userData = await prisma.user.upsert({
           where: { email },
@@ -32,6 +32,7 @@ passport.use(
             bio: bio ?? "",
             email: email ?? "",
             website: blog ?? "",
+            avatar: avatar_url ?? "",
           },
           create: {
             firstName: name[0] ?? "",
@@ -41,6 +42,7 @@ passport.use(
             email: email ?? "",
             website: blog ?? "",
             password: "",
+            avatar: avatar_url ?? "",
           },
         });
         await prisma.$disconnect();
