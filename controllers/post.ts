@@ -4,7 +4,6 @@ import { PrismaClient } from "../generated/prisma/client.js";
 const prisma = new PrismaClient();
 
 async function getPosts(req: Request, res: Response) {
-  // console.log("=== getPosts ===");
   try {
     const posts = await prisma.post.findMany({
       include: { author: true, comments: true, likes: true },
@@ -14,12 +13,10 @@ async function getPosts(req: Request, res: Response) {
     const postsInfoPicked = posts.map((post) => ({
       ...post,
       author: post.author.username,
+      authorAvatar: post.author.avatar,
       comments: post.comments.length,
       likes: post.likes.map((like) => like.id),
     }));
-
-    // console.log(postsInfoPicked);
-
     return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
@@ -29,11 +26,8 @@ async function getPosts(req: Request, res: Response) {
 }
 
 async function getAuthorPosts(req: Request, res: Response) {
-  console.log("=== getAuthorPosts ===");
   try {
     const authorId = +req.params.authorId;
-    console.log({ authorId });
-
     const posts = await prisma.post.findMany({
       where: { authorId },
       include: { author: true, comments: true, likes: true },
@@ -46,9 +40,6 @@ async function getAuthorPosts(req: Request, res: Response) {
       comments: post.comments.length,
       likes: post.likes.map((like) => like.id),
     }));
-
-    console.log(postsInfoPicked);
-
     return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
@@ -58,26 +49,20 @@ async function getAuthorPosts(req: Request, res: Response) {
 }
 
 async function getPostComments(req: Request, res: Response) {
-  console.log("=== getPostComments ===");
   try {
     const postId = +req.params.postId;
-    console.log({ postId });
-
     const comments = await prisma.comment.findMany({
       where: { postId },
       include: { author: true, likes: true },
       orderBy: { createdAt: "desc" },
     });
     await prisma.$disconnect();
-
     const commentsInfoPicked = comments.map((comment) => ({
       ...comment,
       author: comment.author.username,
+      authorAvatar: comment.author.avatar,
       likes: comment.likes.map((like) => like.id),
     }));
-
-    console.log(commentsInfoPicked);
-
     return res.json(commentsInfoPicked);
   } catch (e) {
     console.error(e);
@@ -121,9 +106,6 @@ async function createComment(req: Request, res: Response) {
     const postId = +req.params.postId;
     const { content, authorId } = req.body;
 
-    console.log("=== createComment ===");
-    console.log({ postId });
-
     await prisma.comment.create({ data: { content, authorId, postId } });
     const comments = await prisma.comment.findMany({
       include: { author: true, likes: true },
@@ -136,11 +118,6 @@ async function createComment(req: Request, res: Response) {
       author: comment.author.username,
       likes: comment.likes.map((like) => like.id),
     }));
-
-    console.log("=== Comments ===");
-    console.log(comments);
-    console.log("=== Comments Info Picked===");
-    console.log(commentsInfoPicked);
 
     // Send the new comment created to all connected users (including the sender)
     io.emit("newComment", commentsInfoPicked);
@@ -157,6 +134,7 @@ async function updatePost(req: Request, res: Response) {
     const io = req.app.get("io");
     const id = +req.params.id;
     const { userId, likePost } = req.body;
+
     const post = await prisma.post.update({
       where: { id },
       data: {
@@ -168,15 +146,9 @@ async function updatePost(req: Request, res: Response) {
     });
     await prisma.$disconnect();
 
-    console.log("=== updatePost ===");
-    console.log(post);
-
     const totalLikes = { postId: post.id, likes: post.likes.length };
-    console.log(totalLikes);
-
     // Send total post likes to all connected users (including the sender)
     io.emit("postLike", totalLikes);
-
     return res.json(totalLikes);
   } catch (e) {
     console.error(e);
@@ -190,6 +162,7 @@ async function updateComment(req: Request, res: Response) {
     const io = req.app.get("io");
     const id = +req.params.id;
     const { userId, likePost } = req.body;
+
     const comment = await prisma.comment.update({
       where: { id },
       data: {
@@ -201,15 +174,9 @@ async function updateComment(req: Request, res: Response) {
     });
     await prisma.$disconnect();
 
-    console.log("=== updateComment ===");
-    console.log(comment);
-
     const totalLikes = { commentId: comment.id, likes: comment.likes.length };
-    console.log(totalLikes);
-
     // Send total comment likes to all connected users (including the sender)
     io.emit("commentLike", totalLikes);
-
     return res.json(totalLikes);
   } catch (e) {
     console.error(e);
@@ -222,7 +189,8 @@ async function deletePost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
     const id = +req.params.id;
-    const post = await prisma.post.delete({ where: { id } });
+
+    await prisma.post.delete({ where: { id } });
     const posts = await prisma.post.findMany({
       include: { author: true, comments: true, likes: true },
       orderBy: { createdAt: "desc" },
@@ -235,12 +203,6 @@ async function deletePost(req: Request, res: Response) {
       comments: post.comments.length,
       likes: post.likes.map((like) => like.id),
     }));
-
-    console.log("=== deletePost Picked ===");
-    console.log(postsInfoPicked);
-    console.log("=== Post deleted ===");
-    console.log(post);
-
     // Send the updated post list to connected users (including the sender)
     io.emit("deletePost", postsInfoPicked);
     return res.json(postsInfoPicked);
@@ -255,7 +217,8 @@ async function deleteComment(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
     const id = +req.params.id;
-    const comment = await prisma.comment.delete({ where: { id } });
+
+    await prisma.comment.delete({ where: { id } });
     const comments = await prisma.comment.findMany({
       include: { author: true, likes: true },
       orderBy: { createdAt: "desc" },
@@ -267,12 +230,6 @@ async function deleteComment(req: Request, res: Response) {
       author: comment.author.username,
       likes: comment.likes.map((like) => like.id),
     }));
-
-    console.log("=== deleteComment Picked ===");
-    console.log(commentsInfoPicked);
-    console.log("=== Comment deleted ===");
-    console.log(comment);
-
     // Send the updated comment list to connected users (including the sender)
     io.emit("deleteComment", commentsInfoPicked);
     return res.json(commentsInfoPicked);
