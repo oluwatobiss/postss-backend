@@ -28,7 +28,8 @@ async function main() {
             bio: bio(),
             email: process.env.DEMO_EMAIL as string,
             website: url(),
-            password: hashedPassword!,
+            password: hashedPassword as string,
+            avatar: faker.image.avatarGitHub(),
           },
         });
         await prisma.$disconnect();
