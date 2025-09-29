@@ -7,7 +7,6 @@ import "../passport/github.ts";
 const router = Router();
 
 router.get("/", passport.authenticate("github", { scope: ["profile"] }));
-router.get("/user", controller.getUserInfo);
 router.get(
   "/github",
   passport.authenticate("github", {
@@ -16,6 +15,7 @@ router.get(
   }),
   controller.loginWithGitHub
 );
+router.get("/user", controller.getUserInfo);
 router.post(
   "/",
   validate.loginForm,
