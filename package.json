@@ -9,12 +9,12 @@
     "db:dev": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:reset": "prisma migrate reset -f",
-    "dev": "npx tsx watch server.ts",
-    "lint": "npx eslint server.ts",
+    "dev": "tsx watch server.ts",
+    "lint": "eslint server.ts",
     "postinstall": "prisma generate",
     "seed": "prisma db seed",
-    "start": "npx tsx server.ts",
-    "test": "npx tsx --test"
+    "start": "tsx server.ts",
+    "test": "tsx --test"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
