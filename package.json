@@ -16,9 +16,6 @@
     "start": "tsx server.ts",
     "test": "tsx --test"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
