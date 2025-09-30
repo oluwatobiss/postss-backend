@@ -86,6 +86,7 @@ async function createPost(req: Request, res: Response) {
     const postsInfoPicked = posts.map((post) => ({
       ...post,
       author: post.author.username,
+      authorAvatar: post.author.avatar,
       comments: post.comments.length,
       likes: post.likes.map((like) => like.id),
     }));
@@ -116,6 +117,7 @@ async function createComment(req: Request, res: Response) {
     const commentsInfoPicked = comments.map((comment) => ({
       ...comment,
       author: comment.author.username,
+      authorAvatar: comment.author.avatar,
       likes: comment.likes.map((like) => like.id),
     }));
 
