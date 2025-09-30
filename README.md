@@ -65,9 +65,12 @@ Postss is a social media app, similar to Threads.com, that enables users to soci
 
 - Bcrypt
 - Cookie Parser
+- Cors
+- Dotenv
 - ESLint
 - Express.js
 - Express Validator
+- Faker
 - JSON Web Token
 - Node.js
 - Node Test runner (node:test)
