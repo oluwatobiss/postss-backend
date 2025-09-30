@@ -39,7 +39,7 @@ model Post {
   updatedAt DateTime  @updatedAt
   content   String?
   published Boolean   @default(false)
-  author    User      @relation("Posts", fields: [authorId], references: [id])
+  author    User      @relation("Posts", fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int
   comments  Comment[]
   views     Int       @default(0)
