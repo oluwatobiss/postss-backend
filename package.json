@@ -2,7 +2,7 @@
   "name": "postss-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "build": "npm run postinstall && npm run db:deploy && npm run seed",
     "db:deploy": "prisma migrate deploy",
