@@ -16,6 +16,7 @@ async function getUsers(req: Request, res: Response) {
       username: user.username,
       bio: user.bio,
       followers: user.followers,
+      avatar: user.avatar,
     }));
     return res.json(usersInfoPicked);
   } catch (e) {

@@ -47,6 +47,7 @@ passport.use(
         });
         await prisma.$disconnect();
         const lessUserData = { ...userData, password: "***" };
+        // Complete this callback's task and attach user's data to req.user for subsequent use the app
         return done(null, lessUserData);
       } catch (e) {
         console.error(e);

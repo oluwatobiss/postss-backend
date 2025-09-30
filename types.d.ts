@@ -33,6 +33,7 @@ type User = {
   bio: string;
   email: string;
   website: string;
+  avatar: string;
   password: string;
   status: string;
   followers: number[];
