@@ -73,27 +73,33 @@ async function getPostComments(req: Request, res: Response) {
 
 async function createPost(req: Request, res: Response) {
   try {
-    const io = req.app.get("io");
-    const { content, authorId } = req.body;
+    // const io = req.app.get("io");
+    // const { authorId, content, media } = req.body;
+    // const { media } = req.body;
 
-    await prisma.post.create({ data: { content, authorId } });
-    const posts = await prisma.post.findMany({
-      include: { author: true, comments: true, likes: true },
-      orderBy: { createdAt: "desc" },
-    });
-    await prisma.$disconnect();
+    console.log("=== createPost ===");
 
-    const postsInfoPicked = posts.map((post) => ({
-      ...post,
-      author: post.author.username,
-      authorAvatar: post.author.avatar,
-      comments: post.comments.length,
-      likes: post.likes.map((like) => like.id),
-    }));
+    console.log(req.file);
+    console.log(req.body);
 
-    // Send the new post created to all connected users (including the sender)
-    io.emit("newPost", postsInfoPicked);
-    return res.json(postsInfoPicked);
+    // await prisma.post.create({ data: { content, authorId } });
+    // const posts = await prisma.post.findMany({
+    //   include: { author: true, comments: true, likes: true },
+    //   orderBy: { createdAt: "desc" },
+    // });
+    // await prisma.$disconnect();
+
+    // const postsInfoPicked = posts.map((post) => ({
+    //   ...post,
+    //   author: post.author.username,
+    //   authorAvatar: post.author.avatar,
+    //   comments: post.comments.length,
+    //   likes: post.likes.map((like) => like.id),
+    // }));
+
+    // // Send the new post created to all connected users (including the sender)
+    // io.emit("newPost", postsInfoPicked);
+    // return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

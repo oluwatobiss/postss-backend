@@ -1,8 +1,18 @@
 import { Router } from "express";
+import multer from "multer";
+import { mkdirSync } from "fs";
 import * as middleware from "../middlewares/authentication.ts";
 import * as controller from "../controllers/post.ts";
 
 const router = Router();
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const folder = "uploads";
+    mkdirSync(folder, { recursive: true });
+    cb(null, folder);
+  },
+});
+const upload = multer({ storage });
 
 router.get("/", middleware.authenticateUser, controller.getPosts);
 router.get(
@@ -15,7 +25,12 @@ router.get(
   middleware.authenticateUser,
   controller.getPostComments
 );
-router.post("/", middleware.authenticateUser, controller.createPost);
+router.post(
+  "/",
+  middleware.authenticateUser,
+  upload.single("media"),
+  controller.createPost
+);
 router.post(
   "/:postId/comments",
   middleware.authenticateUser,
