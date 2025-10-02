@@ -74,6 +74,32 @@ async function getPostComments(req: Request, res: Response) {
   }
 }
 
+async function uploadMediaToCloudinary(file: Express.Multer.File) {
+  try {
+    let media = { destination: "", filename: "", originalname: "" };
+    if (file) {
+      const { destination, filename, originalname } = file;
+      media = { destination, filename, originalname };
+    }
+    const mediaName = path.parse(media.originalname).name;
+    const filePath = `${media.destination}/${media.filename}`;
+    const cloudinaryOptions = {
+      folder: media.destination,
+      public_id: mediaName,
+      unique_filename: false,
+      overwrite: true,
+      resource_type: "auto" as "auto",
+    };
+    const uploadFileData =
+      file && (await cloudinary.uploader.upload(filePath, cloudinaryOptions));
+    await rm(media.destination, { recursive: true, force: true });
+    return { path: uploadFileData.secure_url, name: mediaName };
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+}
+
 async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
@@ -137,8 +163,20 @@ async function createComment(req: Request, res: Response) {
     const io = req.app.get("io");
     const postId = +req.params.postId;
     const { content, authorId } = req.body;
+    let media = { path: "", name: "" };
 
-    await prisma.comment.create({ data: { content, authorId, postId } });
+    if (req.file) {
+      const { path, name } = await uploadMediaToCloudinary(req.file);
+      media = { path, name };
+    }
+    await prisma.comment.create({
+      data: {
+        authorId: +authorId,
+        content,
+        postId,
+        ...(media.name && { media }),
+      },
+    });
     const comments = await prisma.comment.findMany({
       include: { author: true, likes: true },
       orderBy: { createdAt: "desc" },
@@ -151,7 +189,6 @@ async function createComment(req: Request, res: Response) {
       authorAvatar: comment.author.avatar,
       likes: comment.likes.map((like) => like.id),
     }));
-
     // Send the new comment created to all connected users (including the sender)
     io.emit("newComment", commentsInfoPicked);
     return res.json(commentsInfoPicked);

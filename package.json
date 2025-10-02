@@ -10,6 +10,7 @@
     "db:push": "prisma db push",
     "db:reset": "prisma migrate reset -f",
     "dev": "npm run seed && tsx watch server.ts",
+    "format": "prisma format",
     "lint": "eslint server.ts",
     "postinstall": "prisma generate",
     "seed": "prisma db seed",

@@ -34,6 +34,7 @@ router.post(
 router.post(
   "/:postId/comments",
   middleware.authenticateUser,
+  upload.single("media"),
   controller.createComment
 );
 router.put("/:id", middleware.authenticateUser, controller.updatePost);
