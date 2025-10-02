@@ -1,4 +1,7 @@
+import path from "path";
 import type { Request, Response } from "express";
+import { v2 as cloudinary } from "cloudinary";
+import { rm } from "fs/promises";
 import { PrismaClient } from "../generated/prisma/client.js";
 
 const prisma = new PrismaClient();
@@ -73,33 +76,50 @@ async function getPostComments(req: Request, res: Response) {
 
 async function createPost(req: Request, res: Response) {
   try {
-    // const io = req.app.get("io");
-    // const { authorId, content, media } = req.body;
-    // const { media } = req.body;
+    const io = req.app.get("io");
+    const { authorId, content } = req.body;
+    const { destination, filename, originalname } =
+      req.file as Express.Multer.File;
 
-    console.log("=== createPost ===");
+    const mediaName = path.parse(originalname).name;
+    const filePath = `${destination}/${filename}`;
+    
+    const cloudinaryOptions = {
+      folder: destination,
+      public_id: mediaName,
+      unique_filename: false,
+      overwrite: true,
+      resource_type: "auto" as "auto",
+    };
 
-    console.log(req.file);
-    console.log(req.body);
+    const uploadFileData = await cloudinary.uploader.upload(
+      filePath,
+      cloudinaryOptions
+    );
+    await rm(destination, { recursive: true, force: true });
+    await prisma.post.create({
+      data: {
+        authorId: +authorId,
+        content,
+        media: { path: uploadFileData.secure_url, name: mediaName },
+      },
+    });
+    const posts = await prisma.post.findMany({
+      include: { author: true, comments: true, likes: true },
+      orderBy: { createdAt: "desc" },
+    });
+    await prisma.$disconnect();
 
-    // await prisma.post.create({ data: { content, authorId } });
-    // const posts = await prisma.post.findMany({
-    //   include: { author: true, comments: true, likes: true },
-    //   orderBy: { createdAt: "desc" },
-    // });
-    // await prisma.$disconnect();
-
-    // const postsInfoPicked = posts.map((post) => ({
-    //   ...post,
-    //   author: post.author.username,
-    //   authorAvatar: post.author.avatar,
-    //   comments: post.comments.length,
-    //   likes: post.likes.map((like) => like.id),
-    // }));
-
-    // // Send the new post created to all connected users (including the sender)
-    // io.emit("newPost", postsInfoPicked);
-    // return res.json(postsInfoPicked);
+    const postsInfoPicked = posts.map((post) => ({
+      ...post,
+      author: post.author.username,
+      authorAvatar: post.author.avatar,
+      comments: post.comments.length,
+      likes: post.likes.map((like) => like.id),
+    }));
+    // Send the new post created to all connected users (including the sender)
+    io.emit("newPost", postsInfoPicked);
+    return res.json(postsInfoPicked);
   } catch (e) {
     console.error(e);
     await prisma.$disconnect();

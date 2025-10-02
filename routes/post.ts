@@ -7,7 +7,7 @@ import * as controller from "../controllers/post.ts";
 const router = Router();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const folder = "uploads";
+    const folder = "uploads/postss";
     mkdirSync(folder, { recursive: true });
     cb(null, folder);
   },
