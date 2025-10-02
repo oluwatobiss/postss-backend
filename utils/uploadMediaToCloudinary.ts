@@ -9,7 +9,9 @@ export async function uploadMediaToCloudinary(file: Express.Multer.File) {
       const { destination, filename, originalname } = file;
       media = { destination, filename, originalname };
     }
-    const mediaName = path.parse(media.originalname).name.trim();
+    const mediaName = `${path.parse(media.originalname).name.trim()}-${
+      media.filename
+    }`;
     const filePath = `${media.destination}/${media.filename}`;
     const cloudinaryOptions = {
       folder: media.destination,
