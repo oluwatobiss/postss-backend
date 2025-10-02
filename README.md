@@ -63,24 +63,26 @@ Postss is a social media app, similar to Threads.com, that enables users to soci
 
 ## Technologies used
 
-- Bcrypt
-- Cookie Parser
-- Cors
-- Dotenv
-- ESLint
-- Express.js
-- Express Validator
-- Faker
-- JSON Web Token
-- Node.js
-- Node Test runner (node:test)
-- Passport.js (local and github strategy)
-- PostgreSQL
-- Prisma ORM
-- Socket IO
-- SuperTest
-- TypeScript
-- TypeScript Execute (tsx)
+- Bcrypt: Hash password
+- Cloudinary: Store images
+- Cookie Parser: Store JWT in cookie
+- Cors: Configure CORS
+- Dotenv: Load `.env` file's environment variables
+- ESLint: Lint code
+- Express.js: Provide tools that streamline Node.js code
+- Express Validator: Validate and sanitize forms
+- Faker: Generate realistic-looking fake data
+- JSON Web Token: Generate and verify JSON Web Tokens (JWTs)
+- Multer: Process forms with `enctype="multipart/form-data"` attribute
+- Node.js: Use JavaScript to develop app's backend
+- Node Test runner (node:test): Run test cases
+- Passport.js (local and github strategy): Verify user credentials
+- PostgreSQL: Store and manage structured data
+- Prisma ORM: Use type-safe JavaScript APIs to interact with database
+- Socket IO: Enable event-based simultaneous communication between server and client
+- SuperTest: Create HTTP routes' test cases
+- TypeScript: Type check code
+- TypeScript Execute (tsx): Run TypeScript code
 
 ## Usage
 
@@ -112,6 +114,9 @@ touch .env
 
 ```
 ADMIN_CODE=example-code
+CLOUDINARY_CLOUD_NAME=exam0plex
+CLOUDINARY_API_KEY=000000000000000
+CLOUDINARY_API_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxx
 DATABASE_URL=postgresql://username:password@localhost:5432/posts
 DEMO_EMAIL=example@mail.com
 DEMO_PASSWORD=example-password
@@ -120,7 +125,6 @@ GITHUB_CLIENT_SECRET=00000e00000x0a0m00mp000lesec00r00e00t000
 JWT_SECRET=example_jwt_secret
 PORT=3001
 POSTSS_APP_URI=http://localhost:3000
-
 ```
 
 6. Migrate the project's schema to your database
