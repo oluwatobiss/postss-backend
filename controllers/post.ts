@@ -78,30 +78,35 @@ async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
     const { authorId, content } = req.body;
-    const { destination, filename, originalname } =
-      req.file as Express.Multer.File;
+    let media = { destination: "", filename: "", originalname: "" };
 
-    const mediaName = path.parse(originalname).name;
-    const filePath = `${destination}/${filename}`;
-    
+    if (req.file) {
+      const { destination, filename, originalname } =
+        req.file as Express.Multer.File;
+      media = { destination, filename, originalname };
+    }
+
+    const mediaName = path.parse(media.originalname).name;
+    const filePath = `${media.destination}/${media.filename}`;
     const cloudinaryOptions = {
-      folder: destination,
+      folder: media.destination,
       public_id: mediaName,
       unique_filename: false,
       overwrite: true,
       resource_type: "auto" as "auto",
     };
 
-    const uploadFileData = await cloudinary.uploader.upload(
-      filePath,
-      cloudinaryOptions
-    );
-    await rm(destination, { recursive: true, force: true });
+    const uploadFileData =
+      req.file &&
+      (await cloudinary.uploader.upload(filePath, cloudinaryOptions));
+    await rm(media.destination, { recursive: true, force: true });
     await prisma.post.create({
       data: {
         authorId: +authorId,
         content,
-        media: { path: uploadFileData.secure_url, name: mediaName },
+        ...(uploadFileData && {
+          media: { path: uploadFileData.secure_url, name: mediaName },
+        }),
       },
     });
     const posts = await prisma.post.findMany({
