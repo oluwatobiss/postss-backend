@@ -21,7 +21,11 @@ export async function uploadMediaToCloudinary(file: Express.Multer.File) {
     const uploadFileData =
       file && (await cloudinary.uploader.upload(filePath, cloudinaryOptions));
     await rm(media.destination, { recursive: true, force: true });
-    return { path: uploadFileData.secure_url, name: mediaName };
+    return {
+      destination: media.destination,
+      name: mediaName,
+      path: uploadFileData.secure_url,
+    };
   } catch (e) {
     console.error(e);
     process.exit(1);

@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { v2 as cloudinary } from "cloudinary";
 import { PrismaClient } from "../generated/prisma/client.js";
 import { uploadMediaToCloudinary } from "../utils/uploadMediaToCloudinary.ts";
 
@@ -76,10 +77,12 @@ async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
     const { authorId, content } = req.body;
-    let media = { path: "", name: "" };
+    let media = { destination: "", name: "", path: "" };
     if (req.file) {
-      const { path, name } = await uploadMediaToCloudinary(req.file);
-      media = { path, name };
+      const { destination, name, path } = await uploadMediaToCloudinary(
+        req.file
+      );
+      media = { destination, name, path };
     }
 
     await prisma.post.create({
@@ -214,16 +217,32 @@ async function deletePost(req: Request, res: Response) {
     const io = req.app.get("io");
     const id = +req.params.id;
 
-    await prisma.post.delete({ where: { id } });
+    const deletedPost = await prisma.post.delete({ where: { id } });
+    const media = deletedPost?.media as {
+      destination: string;
+      name: string;
+      path: string;
+    };
     const posts = await prisma.post.findMany({
       include: { author: true, comments: true, likes: true },
       orderBy: { createdAt: "desc" },
     });
     await prisma.$disconnect();
 
+    if (media.name) {
+      const filePath = `${media.destination}/${media.name}`;
+
+      console.log("=== deletePost ===");
+      console.log(deletedPost);
+      console.log({ filePath });
+
+      cloudinary.uploader.destroy(filePath);
+    }
+
     const postsInfoPicked = posts.map((post) => ({
       ...post,
       author: post.author.username,
+      authorAvatar: post.author.avatar,
       comments: post.comments.length,
       likes: post.likes.map((like) => like.id),
     }));
