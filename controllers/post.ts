@@ -1,8 +1,6 @@
-import path from "path";
 import type { Request, Response } from "express";
-import { v2 as cloudinary } from "cloudinary";
-import { rm } from "fs/promises";
 import { PrismaClient } from "../generated/prisma/client.js";
+import { uploadMediaToCloudinary } from "../utils/uploadMediaToCloudinary.ts";
 
 const prisma = new PrismaClient();
 
@@ -74,65 +72,21 @@ async function getPostComments(req: Request, res: Response) {
   }
 }
 
-async function uploadMediaToCloudinary(file: Express.Multer.File) {
-  try {
-    let media = { destination: "", filename: "", originalname: "" };
-    if (file) {
-      const { destination, filename, originalname } = file;
-      media = { destination, filename, originalname };
-    }
-    const mediaName = path.parse(media.originalname).name.trim();
-    const filePath = `${media.destination}/${media.filename}`;
-    const cloudinaryOptions = {
-      folder: media.destination,
-      public_id: mediaName,
-      unique_filename: false,
-      overwrite: true,
-      resource_type: "auto" as "auto",
-    };
-    const uploadFileData =
-      file && (await cloudinary.uploader.upload(filePath, cloudinaryOptions));
-    await rm(media.destination, { recursive: true, force: true });
-    return { path: uploadFileData.secure_url, name: mediaName };
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
-  }
-}
-
 async function createPost(req: Request, res: Response) {
   try {
     const io = req.app.get("io");
     const { authorId, content } = req.body;
-    let media = { destination: "", filename: "", originalname: "" };
-
+    let media = { path: "", name: "" };
     if (req.file) {
-      const { destination, filename, originalname } =
-        req.file as Express.Multer.File;
-      media = { destination, filename, originalname };
+      const { path, name } = await uploadMediaToCloudinary(req.file);
+      media = { path, name };
     }
 
-    const mediaName = path.parse(media.originalname).name;
-    const filePath = `${media.destination}/${media.filename}`;
-    const cloudinaryOptions = {
-      folder: media.destination,
-      public_id: mediaName,
-      unique_filename: false,
-      overwrite: true,
-      resource_type: "auto" as "auto",
-    };
-
-    const uploadFileData =
-      req.file &&
-      (await cloudinary.uploader.upload(filePath, cloudinaryOptions));
-    await rm(media.destination, { recursive: true, force: true });
     await prisma.post.create({
       data: {
         authorId: +authorId,
         content,
-        ...(uploadFileData && {
-          media: { path: uploadFileData.secure_url, name: mediaName },
-        }),
+        ...(media.name && { media }),
       },
     });
     const posts = await prisma.post.findMany({
@@ -164,11 +118,11 @@ async function createComment(req: Request, res: Response) {
     const postId = +req.params.postId;
     const { content, authorId } = req.body;
     let media = { path: "", name: "" };
-
     if (req.file) {
       const { path, name } = await uploadMediaToCloudinary(req.file);
       media = { path, name };
     }
+
     await prisma.comment.create({
       data: {
         authorId: +authorId,
