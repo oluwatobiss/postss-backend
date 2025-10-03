@@ -229,13 +229,8 @@ async function deletePost(req: Request, res: Response) {
     });
     await prisma.$disconnect();
 
-    if (media.name) {
+    if (media?.name) {
       const filePath = `${media.destination}/${media.name}`;
-
-      console.log("=== deletePost ===");
-      console.log(deletedPost);
-      console.log({ filePath });
-
       cloudinary.uploader.destroy(filePath);
     }
 
