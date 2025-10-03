@@ -6,11 +6,13 @@ import "../passport/local.ts";
 
 function getUserInfo(req: Request, res: Response) {
   const token = req.cookies.jwt; // get the token res.cookie stored as jwt
+  console.log({ token });
   if (!token)
     return res.status(401).json({ error: "No verification token found" });
   const payload = verifyToken(token);
   if (!payload)
     return res.status(401).json({ error: "Invalid verification token" });
+
   res.json({ token, payload });
 }
 
