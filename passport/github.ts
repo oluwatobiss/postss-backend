@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const optionsObject = {
   clientID: process.env.GITHUB_CLIENT_ID as string,
   clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-  callbackURL: "/login/github",
+  callbackURL: `${process.env.NEXT_PUBLIC_BACKEND_URI}/login/github`,
 };
 
 passport.use(
