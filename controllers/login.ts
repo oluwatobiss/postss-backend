@@ -22,6 +22,10 @@ function loginWithGitHub(req: Request, res: Response) {
   // This is safer than exposing the JWT in the URL as a query parameter (/profile?token=...)
   // It protects against XSS attack.
   // Exposing JWT in a URL will make it readable by frontend JS and leaked in browser history.
+
+  console.log("=== loginWithGitHub ===");
+  console.log({ token });
+
   res.cookie("jwt", token, {
     httpOnly: true, // make the cookie inaccessible to front-end JavaScript
     secure: process.env.NODE_ENV === "production", // ensure cookie is sent via only https in production
