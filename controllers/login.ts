@@ -25,7 +25,7 @@ function loginWithGitHub(req: Request, res: Response) {
   res.cookie("jwt", token, {
     httpOnly: true, // make the cookie inaccessible to front-end JavaScript
     secure: process.env.NODE_ENV === "production", // ensure cookie is sent via only https in production
-    sameSite: "lax",
+    sameSite: "none", // allow sending cookie in all context (https://web.dev/articles/samesite-cookies-explained)
     // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     maxAge: 5 * 60 * 1000, // 5 mins
   });
