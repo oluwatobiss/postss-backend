@@ -6,13 +6,11 @@ import "../passport/local.ts";
 
 function getUserInfo(req: Request, res: Response) {
   const token = req.cookies.jwt; // get the token res.cookie stored as jwt
-  console.log({ token });
   if (!token)
     return res.status(401).json({ error: "No verification token found" });
   const payload = verifyToken(token);
   if (!payload)
     return res.status(401).json({ error: "Invalid verification token" });
-
   res.json({ token, payload });
 }
 
@@ -22,16 +20,12 @@ function loginWithGitHub(req: Request, res: Response) {
   // This is safer than exposing the JWT in the URL as a query parameter (/profile?token=...)
   // It protects against XSS attack.
   // Exposing JWT in a URL will make it readable by frontend JS and leaked in browser history.
-
-  console.log("=== loginWithGitHub ===");
-  console.log({ token });
-
   res.cookie("jwt", token, {
     httpOnly: true, // make the cookie inaccessible to front-end JavaScript
     secure: process.env.NODE_ENV === "production", // ensure cookie is sent via only https in production
     sameSite: "none", // allow sending cookie in all context (https://web.dev/articles/samesite-cookies-explained)
-    // maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    maxAge: 5 * 60 * 1000, // 5 mins
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // maxAge: 5 * 60 * 1000, // 5 mins
   });
   res.redirect(`${process.env.POSTSS_APP_URI}/github`);
 }
